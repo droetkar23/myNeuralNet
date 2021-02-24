@@ -7,6 +7,7 @@ class NeuralNet:
         np.random.seed(1)
         self.layer_sizes = layer_sizes
         self.layer_number = len(layer_sizes)
+        self.activations = [np.zeros(y) for y in layer_sizes]
         self.biases = [np.random.randn(y, 1) for y in layer_sizes[1:]]
         self.weights = [np.random.randn(y, x) for x, y in zip(layer_sizes[1:], layer_sizes[:-1])]
 
@@ -15,18 +16,17 @@ class NeuralNet:
     #         for a in range(self.layer_sizes[index]):
     #             input('Provide')
 
-    def sigmoid(self, z):
+    @staticmethod
+    def sigmoid( z):
         return 1.0 / (1.0 + np.exp(-z))
 
-    def feedforward(self, a):
+    def feedforward(self, input_layer):
         # if not (len(a[0]) == self.layer_sizes[0]): print('The input does not match the neural net.')
-        for b, w in zip(self.biases, self.weights):
-            print(np.shape(w))
-            print(np.shape(a))
-            print(np.dot(a, w))
-            print(b.T)
-            a = self.sigmoid(np.dot(a, w) + b.T)
-        return a
+        for a, b, w in zip(self.activations, self.biases, self.weights):
+            self.activations = self.sigmoid(np.dot(input_layer, w) + b.T)
+        return input_layer
+
+    def backprop(self,):
 
 
 nn = NeuralNet(layer_sizes=[3, 4, 5, 3, 1])
