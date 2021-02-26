@@ -26,7 +26,7 @@ class NeuralNet:
     #         for a in range(self.layer_sizes[index]):
     #             input('Provide')
 
-    def feedforward(self, input_layer):
+    def think(self, input_layer):
 
         if not (len(input_layer[0]) == self.layer_sizes[0]):
             print('The input does not match the neural net.')
@@ -37,46 +37,45 @@ class NeuralNet:
             self.activations[i + 1] = sigmoid(np.dot(a, w) + b)
         return self.activations[-1]
 
-    def backprop(self, output_layer):
+    def gradient(self):
 
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         z = [np.dot(a, w) + b for a, w, b in zip(self.activations, self.weights, self.biases)]
 
-
-        nabla_a = output_layer
+        nabla_a = self.activations[-1]
         print('nabla_a = output_layer')
-        print(nabla_a.shape, '=', output_layer.shape)
-        # nabla_w[-1] = np.outer(self.activations[-2], sigmoid_derivative(z[-1]) * nabla_a)
-        # nabla_b[-1] = sigmoid_derivative(z[-1]) * nabla_a
+        print(nabla_a.shape, '=', self.activations[-1].shape)
 
-        for i, a, w, z, n_w, n_b in zip(range(self.layer_number - 1, 0, -1), self.activations[-2::-1],
-                                        self.weights[::-1], z[::-1],
-                                        nabla_w[::-1], nabla_b[::-1]):
+        for a, w, z, n_w, n_b in zip(self.activations[-2::-1], self.weights[::-1], z[::-1],
+                                     nabla_w[::-1], nabla_b[::-1]):
 
-            print(i)
-
-            print('nabla_w = activations x dsigm*nabla_a')
-            print(n_w.shape, '= ', a.shape, 'x', z.shape, '*', nabla_a.shape)
-
+            nabla_w = np.outer(a, sigmoid_derivative(z) * nabla_a)
+            nabla_b = sigmoid_derivative(z) * nabla_a
             nabla_a = np.inner(sigmoid_derivative(z) * nabla_a, w)
+
+            # print('nabla_w = activations x dsigm*nabla_a')
+            # print(n_w.shape, '= ', a.shape, 'x', z.shape, '*', nabla_a.shape)
             # print('nabla_a= <w,sigma!(z)*nabla_a(before)')
             # print(nabla_a.shape, '= <', w.shape, ',',  sigmoid_derivative(z).shape, '* nabla_a(before)>')
-            # nabla_w[i] = np.outer(a, sigmoid_derivative(z) * nabla_a)
-            # nabla_b[i] = sigmoid_derivative(z) * nabla_a
-
 
         return nabla_w, nabla_b
 
+    def learn(self, learning_rate: float = 0.1, epochs: int = 1):
+        for step in range(epochs):
+            self.weights += - learning_rate * self.gradient()[0]
+            self.biases += - learning_rate * self.gradient()[1]
 
-nn = NeuralNet(layer_sizes=[4, 3, 2])
 
-input_data = np.array([[i for i in range(4)]])
+nn = NeuralNet(layer_sizes=[5, 4, 3, 2])
 
-result = nn.feedforward(input_data)
+input_data = np.array([[i for i in range(5)]])
+
+result = nn.think(input_data)
 print('result: ')
 print(result)
-nn.backprop(np.array([[1, 2]]))
+print(nn.gradient())
+
 # print('biases: ', nn.biases)
 # print('weights: ', nn.weights)
 #
