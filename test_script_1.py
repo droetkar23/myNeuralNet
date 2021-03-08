@@ -1,0 +1,1 @@
+nn.learn(learning_rate=1.0, epochs=1, training_inputs=training_inputs, training_outputs=training_outputs)
