@@ -1,7 +1,5 @@
-from typing import List
 
 import numpy as np
-from numpy.core._multiarray_umath import ndarray
 
 
 def sigmoid(z):
@@ -35,7 +33,7 @@ class NeuralNet:
         # if not (len(input_layer[0]) == self.layer_sizes[0]):
         #     print('The input does not match the neural net.')
 
-        self.activations[0] = input_layer
+        self.activations[0] = np.array(input_layer)
 
         for i, a, w, b in zip(range(self.layer_number), self.activations, self.weights, self.biases):
             print(i)
@@ -48,20 +46,23 @@ class NeuralNet:
     def gradient(self, training_example):
 
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        #nabla_b = [np.zeros(b.shape) for b in self.biases] problem if empty then we cant use shape later on
+        nabla_b = [np.zeros(b.shape) for b in self.biases]  # problem if empty then we cant use shape later on
         z = [np.dot(a, w) + b for a, w, b in zip(self.activations, self.weights, self.biases)]
 
-        nabla_a = self.activations[-1]-training_example
+        nabla_a = self.activations[-1]-np.array(training_example)
+        print(nabla_a.shape)
 
-        for i, a, w, z in zip(range(self.layer_number-2,-1,-1),
-                                        self.activations[-2::-1], self.weights[::-1], z[::-1]):
+        for i, a, z, w in zip(range(self.layer_number-2, -1, -1),
+                              self.activations[-2::-1], z[::-1], self.weights[::-1]):
 
-            nabla_w[i] = np.outer(a, sigmoid_derivative(z) * nabla_a)
-            #nabla_b[i] = sigmoid_derivative(z) * nabla_a
+            print(i)
+            print(nabla_a.shape)
+            nabla_w[i] = np.outer(a*sigmoid_derivative(z), nabla_a)
+            #nabla_b[i] = sigmoid_derivative(z)*nabla_a
+            nabla_a = np.inner(nabla_a*sigmoid_derivative(z), w)
 
-            nabla_a = np.inner(sigmoid_derivative(z) * nabla_a, w)
 
-        return nabla_w #, nabla_b
+        return nabla_w  # , nabla_b
 
     def learn(self, learning_rate: float = 0.1, epochs: int = 1, training_inputs=None, training_outputs=None):
 
@@ -78,11 +79,6 @@ class NeuralNet:
             self.weights = [w - learning_rate * n_w for w, n_w in zip(self.weights, nabla_w)]
             #self.biases = [b - learning_rate * nabla_b for b, nabla_b in zip(self.biases,nabla_b)]
 
-
-
-# nn = NeuralNet(layer_sizes=[5, 4, 3, 2])
-#
-# input_data = np.array([[i for i in range(5)]])
 
 training_inputs = np.array([[0,0,1],
                             [1,1,1],
