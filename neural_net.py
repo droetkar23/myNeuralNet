@@ -1,3 +1,4 @@
+from typing import List, Any, Tuple
 
 import numpy as np
 
@@ -16,9 +17,9 @@ class NeuralNet:
         np.random.seed(1)
         self.layer_sizes = layer_sizes
         self.layer_number = len(layer_sizes)
-        self.activations = [np.zeros(y) for y in layer_sizes]
+        self.activations = [np.zeros((1,y)) for y in layer_sizes]
         # biases start at second layer, first entry belongs to second layer etc.
-        self.biases = [np.random.randn(1, y) for y in layer_sizes[1:-1:]]
+        self.biases = [np.random.randn(1, y) for y in layer_sizes[1:-1]]
         self.biases.append(np.zeros(self.activations[-1].shape))
         # weights start at second layer, first entry belongs to second layer etc.
         self.weights = [np.random.randn(y, x) for x, y in zip(layer_sizes[1:], layer_sizes[:-1])]
@@ -30,54 +31,57 @@ class NeuralNet:
 
     def think(self, input_layer):
 
-        # if not (len(input_layer[0]) == self.layer_sizes[0]):
-        #     print('The input does not match the neural net.')
-
         self.activations[0] = np.array(input_layer)
 
         for i, a, w, b in zip(range(self.layer_number), self.activations, self.weights, self.biases):
-            print(i)
             self.activations[i + 1] = sigmoid(np.dot(a, w) + b)
-
-        self.activations[-1] = sigmoid(np.dot(self.activations[-2], self.weights[-1]))
 
         return self.activations[-1]
 
-    def gradient(self, training_example):
 
-        nabla_w = [np.zeros(w.shape) for w in self.weights]
-        nabla_b = [np.zeros(b.shape) for b in self.biases]  # problem if empty then we cant use shape later on
-        z = [np.dot(a, w) + b for a, w, b in zip(self.activations, self.weights, self.biases)]
+    def gradient(self, input, expected_output):
 
-        nabla_a = self.activations[-1]-np.array(training_example)
-        print(nabla_a.shape)
+        self.think(input)   # calculate the activations from 'input' that are needed for the backpropagation algorithm
+
+        nabla_w = [np.zeros(w.shape) for w in self.weights] # initialise the matrices for the w_gradient
+        nabla_b = [np.zeros(b.shape) for b in self.biases]  # initialise the matrices for the b_gradient
+        z = [np.dot(a, w) + b for a, w, b in zip(self.activations, self.weights, self.biases)] # a = sigmoid(z) ...
+
+        nabla_a = self.activations[-1]-np.array(expected_output)
 
         for i, a, z, w in zip(range(self.layer_number-2, -1, -1),
                               self.activations[-2::-1], z[::-1], self.weights[::-1]):
 
-            print(i)
-            print(nabla_a.shape)
-            nabla_w[i] = np.outer(a*sigmoid_derivative(z), nabla_a)
-            #nabla_b[i] = sigmoid_derivative(z)*nabla_a
+            nabla_w[i] = np.outer(a, nabla_a * sigmoid_derivative(z))
+            nabla_b[i] = nabla_a * sigmoid_derivative(z)
             nabla_a = np.inner(nabla_a*sigmoid_derivative(z), w)
 
+        nabla_b[-1] = np.zeros_like(nabla_b[-1])
 
-        return nabla_w  # , nabla_b
+        return (nabla_w, nabla_b)
+
+    def make_step(self, batch, eta):
+
+        nabla_w = [np.zeros_like(w) for w in self.weights]
+        nabla_b = [np.zeros_like(b) for b in self.biases]
+
+        for i, o in batch:
+            delta_nabla_w, delta_nabla_b = self.gradient(i,o)
+            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+            nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+
+        self.weights = [w - (eta/len(batch[0])) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (eta/len(batch[0])) * nb for b, nb in zip(self.biases, nabla_b)]
+
+
 
     def learn(self, learning_rate: float = 0.1, epochs: int = 1, training_inputs=None, training_outputs=None):
 
-        for step in range(epochs):
+        for epoch in range(epochs):
+            pass
 
-            nabla_w = np.empty(shape=(self.weights,training_inputs.shape[0]))
-            for ex_num, i,o in zip(range(3),training_inputs, training_outputs):
-                print(ex_num)
-                self.think(i)
-                nabla_w[ex_num]=np.array(self.gradient(o))
-                #nabla_w, nabla_b = self.gradient(o)
 
-            nabla_w.mean(axis=1)
-            self.weights = [w - learning_rate * n_w for w, n_w in zip(self.weights, nabla_w)]
-            #self.biases = [b - learning_rate * nabla_b for b, nabla_b in zip(self.biases,nabla_b)]
+
 
 
 training_inputs = np.array([[0,0,1],
@@ -89,6 +93,8 @@ training_outputs = np.array([[0],
                              [1],
                              [1],
                              [0]])
+
+training_data = [(ti,to) for ti, to in zip(training_inputs,training_outputs)]
 
 # result = nn.think(input_data)
 # print('result: ')
