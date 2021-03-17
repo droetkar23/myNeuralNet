@@ -1,4 +1,3 @@
-from typing import List, Any, Tuple
 
 import numpy as np
 
@@ -24,10 +23,6 @@ class NeuralNet:
         # weights start at second layer, first entry belongs to second layer etc.
         self.weights = [np.random.randn(y, x) for x, y in zip(layer_sizes[1:], layer_sizes[:-1])]
 
-    # def manual_set(self):
-    #     for index, item in enumerate(self.layer_sizes):
-    #         for a in range(self.layer_sizes[index]):
-    #             input('Provide')
 
     def think(self, input_layer):
 
@@ -80,38 +75,3 @@ class NeuralNet:
         for epoch in range(epochs):
             pass
 
-
-
-
-
-training_inputs = np.array([[0,0,1],
-                            [1,1,1],
-                            [1,0,1],
-                            [0,1,1]])
-
-training_outputs = np.array([[0],
-                             [1],
-                             [1],
-                             [0]])
-
-training_data = [(ti,to) for ti, to in zip(training_inputs,training_outputs)]
-
-# result = nn.think(input_data)
-# print('result: ')
-# print(result)
-
-nn = NeuralNet(layer_sizes=[3,1])
-#small_network.think(np.array([[1,1,1]]))
-#small_network.learn(learning_rate=3.0, epochs=1, training_inputs=training_inputs, training_outputs=training_outputs)
-
-#print('layer_number', small_network.layer_number)
-# print(small_network.weights)
-#print('weights=', small_network.weights)
-#print('biases= ', small_network.biases)
-
-
-# print('biases: ', nn.biases)
-# print('weights: ', nn.weights)
-#
-# print('zip gives:')
-# print(list(zip(range(nn.layer_number), nn.activations, nn.biases, nn.weights)))
