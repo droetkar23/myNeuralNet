@@ -13,8 +13,11 @@ needed packages: numpy
 usage:
 
 to access the mnist data, use the pickle package:
+
 import pickle
+
 mnist_training_data, mnist_test_data = pickle.load(open('data/mnist_data/mnist_data_pickled.p', 'rb'))
 
 to use the use the NeuralNet class:
+
 from neural_net import NeuralNet
