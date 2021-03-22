@@ -114,3 +114,22 @@ class NeuralNet:
         p = correct_classifications / len(data_set)
 
         return p
+    
+        def show_example(self, data_set=None, guessed_correctly=True):
+
+        example_number=0
+
+        while not guessed_correctly:
+            example_number = np.random.randint(0,len(data_set))
+            if self.think(data_set[example_number][0]).argmax() != data_set[example_number][1].argmax():
+                guessed_correctly=True
+
+        img = data_set[example_number][0].reshape(28,28)
+        description = 'The nets guess:' + str(self.think(data_set[example_number][0]).argmax()) +\
+                        ',the correct label is:' + str(data_set[example_number][1].argmax())
+
+        fig, ax = plt.subplots()
+        ax.imshow(img, cmap='gray')
+        ax.set_title(description)
+        plt.show()
+
