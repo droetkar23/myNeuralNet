@@ -115,7 +115,7 @@ class NeuralNet:
 
         return p
     
-        def show_example(self, data_set=None, guessed_correctly=True):
+    def show_example(self, data_set=None, guessed_correctly=True):
 
         example_number=0
 
