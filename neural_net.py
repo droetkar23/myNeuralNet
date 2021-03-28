@@ -24,6 +24,9 @@ class NeuralNet:
         self.biases.append(np.zeros(self.activations[-1].shape))
         # weights start at second layer, first entry belongs to second layer etc.
         self.weights = [np.random.randn(y, x) for x, y in zip(layer_sizes[1:], layer_sizes[:-1])]
+        
+    def __repr__(self):
+        return str(self.layer_sizes) + '-NeuralNet'
 
     def save_to_file(self, file_path=''):
         if file_path == '':
